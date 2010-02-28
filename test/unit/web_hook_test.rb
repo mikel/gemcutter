@@ -141,6 +141,14 @@ class WebHookTest < ActiveSupport::TestCase
       assert_equal "http://localhost:1234/gems/foogem-3.2.1.gem", payload['gem_uri']
     end
 
+    should "sign the JSON with a signature" do
+      payload = ActiveSupport::JSON.decode(@hook.payload)
+      assert_not_nil(payload['signature'])
+      signature = payload.delete('signature')
+      expected_signature = Digest::MD5.hexdigest("#{payload.keys.sort.join('')}#{@hook.user.api_key}")
+      assert_equal(expected_signature, signature)
+    end
+
     should "send the right version out even for older gems" do
       new_version = Factory(:version, :number => "2.0.0", :rubygem => @rubygem)
       new_hook    = Factory(:web_hook,

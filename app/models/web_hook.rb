@@ -72,7 +72,8 @@ class WebHook < ActiveRecord::Base
   end
 
   def payload
-    deploy_gem.payload(version, host_with_port).to_json
+    payload = deploy_gem.payload(version, host_with_port)
+    payload.merge(sign(payload)).to_json
   end
 
   def perform
@@ -85,5 +86,9 @@ class WebHook < ActiveRecord::Base
 
   def to_json(options = {})
     super(options.merge(:only => [:url, :failure_count]))
+  end
+
+  def sign(payload)
+    {:signature => Digest::MD5.hexdigest("#{payload.keys.sort.join('')}#{user.api_key}")}
   end
 end
