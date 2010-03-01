@@ -148,7 +148,8 @@ class WebHookTest < ActiveSupport::TestCase
 
       development    = payload['dependencies']['development'].each { |a| "#{a[:name]}#{a[:requirements]}"}
       runtime        = payload['dependencies']['runtime'].each { |a| "#{a[:name]}#{a[:requirements]}"}
-      payload_string = payload.stringify_keys.keys.sort.map { |k| "#{payload[k]}" }
+      payload        = payload.stringify_keys.reject { |k,v| k == 'dependencies' }
+      payload_string = payload.keys.sort.map { |k| "#{payload[k]}" }
       expected_signature = Digest::SHA1.hexdigest("#{payload_string}#{development}#{runtime}#{@hook.user.api_key}")
 
       assert_equal(expected_signature, signature)
