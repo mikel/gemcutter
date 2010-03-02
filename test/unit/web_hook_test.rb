@@ -146,11 +146,7 @@ class WebHookTest < ActiveSupport::TestCase
       assert_not_nil(payload['signature'])
       signature = payload.delete('signature')
 
-      development    = payload['dependencies']['development'].each { |a| "#{a[:name]}#{a[:requirements]}"}
-      runtime        = payload['dependencies']['runtime'].each { |a| "#{a[:name]}#{a[:requirements]}"}
-      payload        = payload.stringify_keys.reject { |k,v| k == 'dependencies' }
-      payload_string = payload.keys.sort.map { |k| "#{payload[k]}" }
-      expected_signature = Digest::SHA1.hexdigest("#{payload_string}#{development}#{runtime}#{@hook.user.api_key}")
+      expected_signature = Digest::SHA1.hexdigest("#{payload['name']}#{payload['version']}#{payload['downloads']}#{@hook.user.api_key}")
 
       assert_equal(expected_signature, signature)
     end

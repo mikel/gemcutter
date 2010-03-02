@@ -89,12 +89,8 @@ class WebHook < ActiveRecord::Base
   end
 
   def sign(payload)
-    # All this for want of an ordered hash
-    development    = payload['dependencies']['development'].each { |a| "#{a[:name]}#{a[:requirements]}"}
-    runtime        = payload['dependencies']['runtime'].each { |a| "#{a[:name]}#{a[:requirements]}"}
-    payload        = payload.stringify_keys.reject { |k,v| k == 'dependencies' }
-    payload_string = payload.keys.sort.map { |k| "#{payload[k]}" }
-    signature = Digest::SHA1.hexdigest("#{payload_string}#{development}#{runtime}#{user.api_key}")
+    p = payload.symbolize_keys
+    signature = Digest::SHA1.hexdigest("#{p[:name]}#{p[:version]}#{p[:downloads]}#{user.api_key}")
     {:signature => signature}
   end
 end
